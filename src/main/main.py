@@ -1,16 +1,21 @@
-# This is a sample Python script.
+from pyspark.sql import SparkSession
+import sys
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print('Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+from src.main.read import FileReader
 
 
-# Press the green button in the gutter to run the script.
+def create_spark_session(master):
+    print("master", master)
+    return SparkSession.builder \
+        .master(master) \
+        .appName("Search Data Processing") \
+        .getOrCreate()
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    print(sys.argv)
+    spark = create_spark_session(sys.argv[1])
+    reader = FileReader(spark)
+    df = reader.read_txt_file(sys.argv[2], delimiter="\t")
+    print(df.count())
+    df.printSchema()
