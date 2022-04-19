@@ -1,6 +1,7 @@
 import unittest
 from pyspark.sql import SparkSession
 
+
 class PySparkTestCase(unittest.TestCase):
 
     @classmethod
@@ -9,6 +10,3 @@ class PySparkTestCase(unittest.TestCase):
             .master("local") \
             .appName("Search Data Processing") \
             .getOrCreate()
-
-
-
