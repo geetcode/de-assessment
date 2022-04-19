@@ -1,7 +1,7 @@
+from pathlib import Path
+
 from pyspark.sql import SparkSession
 import sys
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType
-from typing import List
 from urllib.parse import urlparse, parse_qsl, parse_qs
 from pyspark.sql.functions import  explode_outer
 from pyspark.sql import functions as f
@@ -9,8 +9,9 @@ from pyspark.sql import functions as f
 from src.main.read import FileReader
 
 
+
 def create_spark_session(master):
-    print("master", master)
+    #print("master", master)
     return SparkSession.builder \
         .master(master) \
         .appName("Search Data Processing") \
@@ -43,7 +44,7 @@ def get_search_from_url(referrer):
         search_keyword = result['q']
     elif result.get('p') is not None:
         search_keyword = result['p']
-    print(search_keyword)
+    #print(search_keyword)
     return search_keyword
 
 
@@ -54,7 +55,7 @@ def get_domain_from_url(referrer):
 
 
 def mapToProductArray(x):
-    print(x.product_list)
+    #print(x.product_list)
     hit_time_gmt = x.hit_time_gmt
     date_time = x.date_time
     user_agent = x.user_agent
@@ -89,4 +90,19 @@ if __name__ == '__main__':
         .agg(f.sum("revenue").alias("sum_revenue")) \
         .orderBy(f.col("sum_revenue").desc())
 
-    final_df.write.option("header", True).mode('overwrite').option("delimiter","\t").csv("out/datacsv")
+    final_df.coalesce(1).\
+        write.option("header", True).\
+        mode('overwrite').\
+        option("delimiter","\t").\
+        csv("out/datacsv")
+    #
+    # fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(spark._jsc.hadoopConfiguration())
+    #
+    # # list files in the directory
+    # list_status = fs.listStatus(spark._jvm.org.apache.hadoop.fs.Path(sys.argv[3]))
+    #
+    # # filter name of the file starts with part-
+    # file_name = [file.getPath().getName() for file in list_status if file.getPath().getName().startswith('part-')][0]
+    #
+    # # rename the file
+    # fs.rename(Path("hdfs://out/datacsv/" + '' + file_name), Path("hdfs://out/datacsv/" + '' + "_SearchKeywordPerformance.tab"))
